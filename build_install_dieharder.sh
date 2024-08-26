@@ -12,8 +12,6 @@ INPUT_STRING=$(uname -s)
 		;;
   esac
 
-
-
 echo "Dieharder 3.31.1.4 for macOS, the NON-developer edition"
 mkdir logs
 
@@ -26,15 +24,12 @@ rm gsl.zip
 
 echo "Downloading Dieharder"
 curl -L -o dieharder.zip https://github.com/eddelbuettel/dieharder/archive/refs/tags/3.31.1.4.zip >> logs/curl.std.txt 2>> logs/curl.err.txt
-unzip -u dieharder.zip >> logs/curl.std.txt 2>> logs/curl.err.txt
+unzip -u dieharder.zip 						>> logs/curl.std.txt 2>> logs/curl.err.txt
 rm dieharder.zip
 
-echo "Triggering xcode-select."
-echo "int main(){return 0;}" | c99 -E - > /dev/null
-echo "Press enter after the command line tools have been installed."
-echo "If you want to save time, you can install brew by following the"
-echo "instructions at https://brew.sh while we are waiting."
-read -n 1 key
+#Patching missing automake files in dieharder.
+cp -f gsl-2.8/config.guess dieharder-3.31.1.4/config.guess
+cp -f gsl-2.8/config.sub dieharder-3.31.1.4/config.sub
 
 echo "Verifying brew."
 if [ -x "$(command -v brew)" ]
@@ -51,24 +46,25 @@ read -n 1 key
 fi
 
 echo "Installing libtool automake m4"
-echo "BREW" > brew.std.txt 2> brew.err.txt
-brew install libtool automake m4 >> brew.std.txt 2>> brew.err.txt
+echo "BREW" 								> brew.std.txt
+echo "BREW" 								> brew.err.txt
+brew install libtool automake m4 			>> brew.std.txt 2>> brew.err.txt
 echo 'export PATH="/opt/homebrew/opt/m4/bin:$PATH"' >> ~/.zshrc 2>> brew.err.txt
 
 echo "Building GNU Scientific Library."
 cd gsl-2.8
-make >> ../logs/gsl.std.txt 2>> ../logs/gsl.err.txt
+make 										>> ../logs/gsl.std.txt 2>> ../logs/gsl.err.txt
 echo "Your password is needed to install GSL on your system."
-sudo make install >> ../logs/gsl.std.txt 2>> ../logs/gsl.err.txt
+sudo make install 							>> ../logs/gsl.std.txt 2>> ../logs/gsl.err.txt
 cd ..
 
 echo "Building DieHarder"
-echo "DIEHARDER INSTALL LOG (stdout)" > logs/dieharder.std.txt
-echo "DIEHARDER ERROR LOG (stderr)" > logs/dieharder.err.txt
+echo "DIEHARDER INSTALL LOG (stdout)"	 	> logs/dieharder.std.txt
+echo "DIEHARDER ERROR LOG (stderr)" 		> logs/dieharder.err.txt
 cd dieharder-3.31.1.4
-./autogen.sh >> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
-./configure >> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
-make >> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
+./autogen.sh 								>> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
+./configure 								>> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
+make 										>> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
 echo "Your password is needed to install Dieharder on your system."
-sudo make install >> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
+sudo make install 							>> ../logs/dieharder.std.txt 2>> ../logs/dieharder.err.txt
 cd ..
